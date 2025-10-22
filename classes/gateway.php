@@ -75,10 +75,10 @@ class gateway extends \core_payment\gateway {
     public static function validate_gateway_form(
         account_gateway $form,
         \stdClass $data,
-        \stdClass $config,
-        array $formdata,
+        array $files,
         array &$errors
     ): void {
+        $config = $form->get_gateway_configuration();
         // Add any custom validation if needed.
     }
 
