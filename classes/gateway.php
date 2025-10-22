@@ -114,6 +114,129 @@ class gateway extends \core_payment\gateway {
      * @param string $cancelurl
      * @return string The URL to redirect to for payment.
      */
+    /**
+     * Process incoming webhook from SNAP payment gateway.
+     *
+     * @param array $data The webhook data
+     * @return array Result of the operation
+     */
+    public function process_webhook(array $data): array {
+        global $DB;
+
+        // Log the incoming webhook data
+        \paygw_snap\util::log('Processing webhook: ' . json_encode($data));
+
+        // Get the transaction record
+        $transaction = $DB->get_record('paygw_snap', ['transactionid' => $data['transaction_id']], '*', MUST_EXIST);
+        
+        // Check if already processed
+        if ($transaction->status === 'completed' || $transaction->status === 'success') {
+            return ['status' => 'success', 'message' => 'Transaction already processed'];
+        }
+
+        // Start database transaction
+        $transaction = $DB->start_delegated_transaction();
+
+        try {
+            // Update transaction status
+            $transaction->status = strtolower($data['status']);
+            $transaction->timemodified = time();
+            
+            // If payment was successful, deliver the product
+            if ($transaction->status === 'success' || $transaction->status === 'completed') {
+                // Get payment record
+                $payment = $DB->get_record('payments', ['id' => $transaction->paymentid], '*', MUST_EXIST);
+                
+                // Update payment status
+                $payment->status = \core_payment\helper::PAYMENT_PAID;
+                $payment->timepaid = time();
+                $DB->update_record('payments', $payment);
+                
+                // Deliver the product
+                $payable = \core_payment\helper::get_payable(
+                    $payment->component,
+                    $payment->paymentarea,
+                    $payment->itemid
+                );
+                
+                $paymentid = \core_payment\helper::save_payment($payable);
+                
+                // Trigger payment received event
+                $event = \paygw_snap\event\payment_success::create([
+                    'context' => \context_course::instance($transaction->itemid),
+                    'userid' => $transaction->userid,
+                    'other' => [
+                        'paymentid' => $payment->id,
+                        'amount' => $transaction->amount,
+                        'currency' => $transaction->currency,
+                        'transactionid' => $transaction->transactionid
+                    ]
+                ]);
+                $event->trigger();
+                
+                // Enrol the user if this is a course payment
+                if ($payment->component === 'enrol_fee') {
+                    $this->enrol_user($payment, $transaction);
+                }
+            }
+            
+            // Update the transaction record
+            $DB->update_record('paygw_snap', $transaction);
+            
+            // Commit the transaction
+            $transaction->allow_commit();
+            
+            return ['status' => 'success'];
+            
+        } catch (\Exception $e) {
+            // Rollback the transaction on error
+            $transaction->rollback($e);
+            throw $e;
+        }
+    }
+
+    /**
+     * Enrol a user in a course after successful payment.
+     *
+     * @param stdClass $payment The payment record
+     * @param stdClass $transaction The transaction record
+     */
+    private function enrol_user($payment, $transaction) {
+        global $DB, $CFG;
+        
+        require_once($CFG->libdir . '/enrollib.php');
+        
+        // Get the enrolment plugin
+        $plugin = enrol_get_plugin('fee');
+        if (!$plugin) {
+            throw new \moodle_exception('feepluginnotinstalled', 'enrol_fee');
+        }
+        
+        // Get the course and user
+        $course = $DB->get_record('course', ['id' => $transaction->itemid], '*', MUST_EXIST);
+        $user = $DB->get_record('user', ['id' => $transaction->userid], '*', MUST_EXIST);
+        
+        // Get the enrolment instance
+        $instance = $DB->get_record('enrol', [
+            'courseid' => $course->id,
+            'enrol' => 'fee',
+            'status' => ENROL_INSTANCE_ENABLED
+        ], '*', MUST_EXIST);
+        
+        // Enrol the user
+        $plugin->enrol_user($instance, $user->id, $instance->roleid, time(), 0, ENROL_USER_ACTIVE);
+        
+        // Trigger event
+        $event = \core\event\user_enrolment_created::create([
+            'objectid' => $instance->id,
+            'courseid' => $course->id,
+            'context' => context_course::instance($course->id),
+            'relateduserid' => $user->id,
+            'other' => ['enrol' => 'fee']
+        ]);
+        $event->trigger();
+    }
+
     public function process_payment(
         string $component,
         string $paymentarea,
