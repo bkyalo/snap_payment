@@ -24,6 +24,7 @@
 
 // Plugin info
 $string['pluginname'] = 'SNAP Payments';
+$string['pluginname_desc'] = 'The SNAP payment gateway plugin allows you to receive payments via SNAP payment gateway.';
 $string['gatewayname'] = 'SNAP Payments';
 $string['gatewaydescription'] = 'Securely process payments through the SNAP payment gateway.';
 
