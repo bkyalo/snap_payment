@@ -1,66 +1,44 @@
-# SNAP Payment Gateway for Moodle
+# Self.com Payment Gateway #
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+TO-DO Describe the plugin shortly here.
 
-A secure payment gateway plugin for Moodle that integrates with the SNAP payment processing system.
+TO-DO Provide more detailed description here.
 
-## Features
+## Installing via uploaded ZIP file ##
 
-- Seamless integration with Moodle's payment subsystem
-- Secure payment processing
-- Support for multiple payment methods
-- Transaction logging and tracking
-- Easy configuration through Moodle's admin interface
-- Support for multiple currencies
+1. Log in to your Moodle site as an admin and go to _Site administration >
+   Plugins > Install plugins_.
+2. Upload the ZIP file with the plugin code. You should only be prompted to add
+   extra details if your plugin type is not automatically detected.
+3. Check the plugin validation report and finish the installation.
 
-## Requirements
+## Installing manually ##
 
-- Moodle 4.0+ (or latest stable version)
-- PHP 7.4 or higher
-- cURL extension enabled
-- OpenSSL extension enabled
+The plugin can be also installed by putting the contents of this directory to
 
-## Installation
+    {your/moodle/dirroot}/enrol/selfpay
 
-1. Clone this repository into your Moodle's `payment/gateway/` directory:
-   ```
-   git clone https://github.com/bkyalo/snap_payment.git /path/to/moodle/payment/gateway/snap
-   ```
+Afterwards, log in to your Moodle site as an admin and go to _Site administration >
+Notifications_ to complete the installation.
 
-2. Log in to your Moodle site as an administrator
-3. Go to Site administration > Notifications
-4. Follow the on-screen instructions to complete the installation
-5. Configure the plugin at: Site administration > Plugins > Payment gateways > Manage payment gateways > SNAP
+Alternatively, you can run
 
-## Configuration
+    $ php admin/cli/upgrade.php
 
-1. Navigate to Site administration > Plugins > Payment gateways > Manage payment gateways
-2. Click on "Configure" next to SNAP Payment Gateway
-3. Enter your SNAP API credentials:
-   - Gateway URL
-   - Secret Key
-   - (Optional) Custom success URL
-4. Save the settings
+to complete the installation from the command line.
 
-## Usage
+## License ##
 
-1. Enable the payment gateway in your course settings
-2. Configure the payment amount and currency
-3. Students will see the SNAP payment option during enrollment
-4. After successful payment, they will be automatically enrolled in the course
+2025 Ben TITO <bentito@learnwithsnap.com>
 
-## Support
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
 
-For support, please open an issue in the [GitHub repository](https://github.com/bkyalo/snap_payment/issues).
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-## License
-
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## Author
-
-- **Your Name** - [@bkyalo](https://github.com/bkyalo)
+You should have received a copy of the GNU General Public License along with
+this program.  If not, see <https://www.gnu.org/licenses/>.

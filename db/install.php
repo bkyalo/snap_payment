@@ -15,17 +15,18 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Code to be executed after the plugin's database scheme has been installed is defined here.
  *
  * @package     enrol_selfpay
+ * @category    upgrade
  * @copyright   2025 Ben TITO <bentito@learnwithsnap.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+/**
+ * Custom code to be run on installing the plugin.
+ */
+function xmldb_enrol_selfpay_install() {
 
-$plugin->component = 'enrol_selfpay';
-$plugin->release = '0.1.0';
-$plugin->version = 2025102200;
-$plugin->requires = 2022112800;
-$plugin->maturity = MATURITY_ALPHA;
+    return true;
+}

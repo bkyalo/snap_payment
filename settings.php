@@ -15,17 +15,21 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Plugin administration pages are defined here.
  *
  * @package     enrol_selfpay
+ * @category    admin
  * @copyright   2025 Ben TITO <bentito@learnwithsnap.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'enrol_selfpay';
-$plugin->release = '0.1.0';
-$plugin->version = 2025102200;
-$plugin->requires = 2022112800;
-$plugin->maturity = MATURITY_ALPHA;
+if ($hassiteconfig) {
+    $settings = new admin_settingpage('enrol_selfpay_settings', new lang_string('pluginname', 'enrol_selfpay'));
+
+    // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedIf
+    if ($ADMIN->fulltree) {
+        // TO-DO: Define actual plugin settings page and add it to the tree - {@link https://docs.moodle.org/dev/Admin_settings}.
+    }
+}

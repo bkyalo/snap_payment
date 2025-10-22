@@ -15,17 +15,26 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Plugin strings are defined here.
  *
  * @package     enrol_selfpay
+ * @category    string
  * @copyright   2025 Ben TITO <bentito@learnwithsnap.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'enrol_selfpay';
-$plugin->release = '0.1.0';
-$plugin->version = 2025102200;
-$plugin->requires = 2022112800;
-$plugin->maturity = MATURITY_ALPHA;
+$string['enrol_selfpay:manage'] = 'Manage Self.com enrolments';
+$string['enrol_selfpay:purchase'] = 'Purchase courses via Self.com';
+$string['enrol_selfpay:unenrol'] = 'Unenrol users (Self.com)';
+$string['gatewayurl'] = 'Payment Gateway URL';
+$string['gatewayurl_desc'] = 'The full URL to send the payment payload to (e.g., https://pay.self.com/process)';
+$string['pluginname'] = 'Self.com Payment Gateway';
+$string['pluginname'] = 'Self.com Payment Gateway';
+$string['purchasetitle'] = 'Purchase Course';
+$string['secretkey'] = 'Secret Key';
+$string['secretkey_desc'] = 'The secret encryption key shared with the payment gateway.';
+$string['selfpay:manage'] = 'Manage Self.com enrolments';
+$string['selfpay:purchase'] = 'Purchase course via Self.com';
+$string['selfpay:unenrol'] = 'Unenrol self from course (Self.com)';

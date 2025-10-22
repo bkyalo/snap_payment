@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,184 +12,123 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Library of functions for SNAP Payments.
+ * The enrol plugin selfpay is defined here.
  *
- * @package    paygw_snap
- * @copyright  2025 Your Name <your@email.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     enrol_selfpay
+ * @copyright   2025 Ben TITO <bentito@learnwithsnap.com>
+ * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+// The base class 'enrol_plugin' can be found at lib/enrollib.php. Override
+// methods as necessary.
 
 /**
- * SNAP Payments plugin supports the following features:
- * @uses FEATURE_GROUPS
- * @uses FEATURE_GROUPINGS
- * @uses FEATURE_GROUPMEMBERSONLY
- * @uses FEATURE_MOD_INTRO
- * @uses FEATURE_COMPLETION_TRACKS_VIEWS
- * @uses FEATURE_COMPLETION_HAS_RULES
- * @uses FEATURE_GRADE_HAS_GRADE
- * @uses FEATURE_GRADE_OUTCOMES
- * @param string $feature FEATURE_xx constant for requested feature
- * @return mixed True if module supports feature, null if doesn't know
+ * Class enrol_selfpay_plugin.
  */
-function paygw_snap_supports($feature) {
-    switch($feature) {
-        case FEATURE_BACKUP_MOODLE2:
-            return true;
-        case FEATURE_COMPLETION_TRACKS_VIEWS:
-            return true;
-        case FEATURE_GRADE_HAS_GRADE:
-            return false;
-        case FEATURE_GRADE_OUTCOMES:
-            return false;
-        case FEATURE_GROUPS:
-            return true;
-        case FEATURE_GROUPINGS:
-            return true;
-        case FEATURE_GROUPMEMBERSONLY:
-            return true;
-        case FEATURE_MOD_INTRO:
-            return true;
-        case FEATURE_SHOW_DESCRIPTION:
-            return true;
-        default:
-            return null;
-    }
-}
+class enrol_selfpay_plugin extends enrol_plugin {
 
-/**
- * Add nodes to myprofile page.
- *
- * @param \core_user\output\myprofile\tree $tree Tree object
- * @param stdClass $user user object
- * @param bool $iscurrentuser
- * @param stdClass $course Course object
- * @return void
- */
-function paygw_snap_myprofile_navigation(\core_user\output\myprofile\tree $tree, $user, $iscurrentuser, $course) {
-    global $USER, $DB;
-
-    if (!isloggedin() || isguestuser()) {
-        return;
-    }
-
-    // Add payment history section if user has any payments.
-    $context = context_system::instance();
-    if (has_capability('paygw/snap:view', $context)) {
-        $payments = $DB->get_records('paygw_snap', ['userid' => $user->id], 'timecreated DESC', '*', 0, 10);
-        
-        if (!empty($payments)) {
-            $category = new core_user\output\myprofile\category(
-                'paygw_snap', 
-                get_string('paymenthistory', 'paygw_snap'), 
-                'contact'
-            );
-            $tree->add_category($category);
-
-            foreach ($payments as $payment) {
-                $node = new core_user\output\myprofile\node(
-                    'paygw_snap',
-                    'payment_' . $payment->id,
-                    userdate($payment->timecreated) . ' - ' . 
-                    get_string('amount', 'paygw_snap') . ': ' . 
-                    format_float($payment->amount, 2) . ' ' . $payment->currency,
-                    null,
-                    null,
-                    null,
-                    null,
-                    'text-muted'
-                );
-                $tree->add_node($node);
-            }
-        }
-    }
-}
-
-/**
- * Serves the plugin attachments. Implements needed access control.
- *
- * @param stdClass $course course object
- * @param stdClass $cm course module object
- * @param stdClass $context context object
- * @param string $filearea file area
- * @param array $args extra arguments
- * @param bool $forcedownload whether or not force download
- * @param array $options additional options affecting the file serving
- * @return bool false if file not found, does not return if found - just send the file
- */
-function paygw_snap_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
-    global $CFG, $DB, $USER;
-
-    if ($context->contextlevel != CONTEXT_SYSTEM) {
+    /**
+     * Does this plugin allow manual enrolments?
+     *
+     * All plugins allowing this must implement 'enrol/selfpay:enrol' capability.
+     *
+     * @param stdClass $instance Course enrol instance.
+     * @return bool True means user with 'enrol/selfpay:enrol' may enrol others freely, false means nobody may add more enrolments manually.
+     */
+    public function allow_enrol($instance) {
         return false;
     }
 
-    // Check the filearea is one of the ones we handle.
-    if (!in_array($filearea, ['receipts', 'invoices'])) {
-        return false;
+    /**
+     * Does this plugin allow manual unenrolment of all users?
+     *
+     * All plugins allowing this must implement 'enrol/selfpay:unenrol' capability.
+     *
+     * @param stdClass $instance Course enrol instance.
+     * @return bool True means user with 'enrol/selfpay:unenrol' may unenrol others freely, false means nobody may touch user_enrolments.
+     */
+    public function allow_unenrol($instance) {
+        return true;
     }
 
-    require_login();
-
-    // Check the user has the required capabilities.
-    if (!has_capability('paygw/snap:view', $context)) {
-        return false;
+    /**
+     * Does this plugin allow manual changes in user_enrolments table?
+     *
+     * All plugins allowing this must implement 'enrol/selfpay:manage' capability.
+     *
+     * @param stdClass $instance Course enrol instance.
+     * @return bool True means it is possible to change enrol period and status in user_enrolments table.
+     */
+    public function allow_manage($instance) {
+        return true;
     }
 
-    $itemid = array_shift($args);
-    $filename = array_pop($args);
-    $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
-
-    $fs = get_file_storage();
-    $file = $fs->get_file($context->id, 'paygw_snap', $filearea, $itemid, $filepath, $filename);
-
-    if (!$file) {
-        return false;
+    /**
+     * Does this plugin allow manual unenrolment of a specific user?
+     *
+     * All plugins allowing this must implement 'enrol/selfpay:unenrol' capability.
+     *
+     * This is useful especially for synchronisation plugins that
+     * do suspend instead of full unenrolment.
+     *
+     * @param stdClass $instance Course enrol instance.
+     * @param stdClass $ue Record from user_enrolments table, specifies user.
+     * @return bool True means user with 'enrol/selfpay:unenrol' may unenrol this user, false means nobody may touch this user enrolment.
+     */
+    public function allow_unenrol_user($instance, $ue) {
+        return true;
     }
 
-    // Finally send the file.
-    send_stored_file($file, 0, 0, $forcedownload, $options);
-}
+    /**
+     * Use the standard interface for adding/editing the form.
+     *
+     * @since Moodle 3.1.
+     * @return bool.
+     */
+    public function use_standard_editing_ui() {
+        return true;
+    }
 
-/**
- * Callback function that is called when a user completes a payment.
- *
- * @param stdClass $payment Payment record
- * @param string $component The component name
- * @param string $paymentarea The payment area
- * @param int $itemid The item id
- * @return bool True if successful, false otherwise
- */
-function paygw_snap_payment_completed($payment, $component, $paymentarea, $itemid) {
-    global $DB, $CFG;
-    
-    // Get the payment record.
-    $paymentrecord = $DB->get_record('payments', ['id' => $payment->paymentid], '*', MUST_EXIST);
-    
-    // Update the payment status.
-    $paymentrecord->status = 1; // 1 = completed
-    $paymentrecord->timemodified = time();
-    $DB->update_record('payments', $paymentrecord);
-    
-    // Log the successful payment.
-    $params = [
-        'context' => context_system::instance(),
-        'objectid' => $payment->id,
-        'relateduserid' => $payment->userid,
-        'other' => [
-            'paymentid' => $payment->paymentid,
-            'component' => $component,
-            'paymentarea' => $paymentarea,
-            'itemid' => $itemid
-        ]
-    ];
-    $event = \paygw_snap\event\payment_completed::create($params);
-    $event->trigger();
-    
-    return true;
+    /**
+     * Adds form elements to add/edit instance form.
+     *
+     * @since Moodle 3.1.
+     * @param object $instance Enrol instance or null if does not exist yet.
+     * @param MoodleQuickForm $mform.
+     * @param context $context.
+     * @return void
+     */
+    public function edit_instance_form($instance, MoodleQuickForm $mform, $context) {
+        // Do nothing by default.
+    }
+
+    /**
+     * Perform custom validation of the data used to edit the instance.
+     *
+     * @since Moodle 3.1.
+     * @param array $data Array of ("fieldname"=>value) of submitted data.
+     * @param array $files Array of uploaded files "element_name"=>tmp_file_path.
+     * @param object $instance The instance data loaded from the DB.
+     * @param context $context The context of the instance we are editing.
+     * @return array Array of "element_name"=>"error_description" if there are errors, empty otherwise.
+     */
+    public function edit_instance_validation($data, $files, $instance, $context) {
+        // No errors by default.
+        debugging('enrol_plugin::edit_instance_validation() is missing. This plugin has no validation!', DEBUG_DEVELOPER);
+        return array();
+    }
+
+    /**
+     * Return whether or not, given the current state, it is possible to add a new instance
+     * of this enrolment plugin to the course.
+     *
+     * @param int $courseid.
+     * @return bool.
+     */
+    public function can_add_instance($courseid) {
+        return true;
+    }
 }
