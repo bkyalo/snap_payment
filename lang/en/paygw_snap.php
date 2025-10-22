@@ -41,8 +41,6 @@ $string['paymentredirect_help'] = 'Please wait while we redirect you to the secu
 $string['paymentpending'] = 'Payment pending';
 $string['paymentcompleted'] = 'Payment completed';
 $string['paymentfailed'] = 'Payment failed';
-$string['paymentcancelled'] = 'Payment cancelled';
-
 // Enrollment strings
 $string['assignrole'] = 'Assign role';
 $string['cost'] = 'Enrol cost';
