@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="payment/gateway/snap/db" VERSION="2024102200" COMMENT="XMLDB file for Moodle paygw_snap plugin"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="paygw_snap" COMMENT="Stores SNAP payment transactions">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+        <FIELD NAME="user_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Moodle user ID" />
+        <FIELD NAME="course_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Course ID" />
+        <FIELD NAME="transaction_id" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="External transaction ID from gateway" />
+        <FIELD NAME="amount_paid" TYPE="number" LENGTH="20" DECIMALS="2" NOTNULL="true" SEQUENCE="false" COMMENT="Amount paid" />
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" DEFAULT="pending" COMMENT="Payment status (success/failed/pending)" />
+        <FIELD NAME="payment_timestamp" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Payment timestamp from gateway" />
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Record creation timestamp" />
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+        <KEY NAME="user" TYPE="foreign" FIELDS="user_id" REFTABLE="user" REFFIELDS="id" ON_DELETE="CASCADE" />
+        <KEY NAME="course" TYPE="foreign" FIELDS="course_id" REFTABLE="course" REFFIELDS="id" ON_DELETE="CASCADE" />
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="transactionid" UNIQUE="true" FIELDS="transaction_id" />
+        <INDEX NAME="user_course" UNIQUE="false" FIELDS="user_id,course_id" />
+        <INDEX NAME="status" UNIQUE="false" FIELDS="status" />
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>
