@@ -83,6 +83,25 @@ class gateway extends \core_payment\gateway {
     }
 
     /**
+     * Get the list of supported currencies.
+     *
+     * @return string[] Array of currency codes in the format 'CURRENCYCODE' => 'Description'
+     */
+    public static function get_supported_currencies(): array {
+        // These are the currencies supported by the SNAP payment gateway.
+        // You can modify this list based on the currencies your gateway supports.
+        return [
+            'USD' => 'US Dollar',
+            'EUR' => 'Euro',
+            'GBP' => 'British Pound',
+            'KES' => 'Kenyan Shilling',
+            'UGX' => 'Ugandan Shilling',
+            'TZS' => 'Tanzanian Shilling',
+            // Add more currencies as needed
+        ];
+    }
+
+    /**
      * Process payment.
      *
      * @param string $component
